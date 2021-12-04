@@ -79,8 +79,8 @@ const SFUtils = {
         });
     },
     //Shows or hide the loaded
-    ShowLoader: function (state) {
-        SFUtils.ShowHideElements('html', !state);
+    ShowLoader: function (show) {
+        SFUtils.ShowHideElements('html', !show);
     },
     //Returns the new selector (string) compatible with the specified CMS
     MakeSelectorCompatibleWithCMS: function (selector, cms) {
