@@ -134,7 +134,7 @@
       justify-content: space-between;
       padding: 0.5rem 1rem;
       border-bottom: 1px solid var(--sf-color-neutral-300);
-      .sf-title{
+      .sf-title {
         font-size: 1.2rem;
         font-weight: bold;
         color: var(--sf-color-main);
@@ -172,4 +172,12 @@
     // .sf-footer {
     // }
   }
+}
+
+//Init the page
+html > body:not(.edit):not([data-sf-loader='ok']),
+html > body:not(.edit):not([data-sf-loader='ok']) * {
+ display: none !important;
+ opacity: 0;
+ visibility: hidden;
 }

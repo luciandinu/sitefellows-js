@@ -77,9 +77,14 @@ const SFUtils = {
     },
     //Shows or hide the loaded
     ShowLoader: function (show) {
-        //SFUtils.ShowHideElements('html', !show);
-        document.documentElement.style.visibility = state ? 'visible !important' : 'hidden !important';
-        element.style.opacity = state ? 100 : 0;
+        console.log('ShowLoader', show);
+        if (show && document.body) {
+            document.body.setAttribute('data-sf-loader', '');
+        } else {
+            document.body.setAttribute('data-sf-loader', 'ok');
+        }
+
+
     },
     //Returns the new selector (string) compatible with the specified CMS
     MakeSelectorCompatibleWithCMS: function (selector, cms) {
@@ -367,7 +372,8 @@ const SiteFellows = (function () {
             //Initialize Firebase Auth
             initializeFirebase();
 
-            document.addEventListener('sitefellow/config-loaded', function () {
+
+            //document.addEventListener('sitefellow/config-loaded', function () {
 
                 //If we are in a CMS ditor we exit
                 if (!SFUtils.IsInCMSEditor(SFUtils.GetLocalStoreConfig().SITE.options.cmsCompatibility)) {
@@ -377,7 +383,7 @@ const SiteFellows = (function () {
                 };
 
 
-            });
+            //});
 
 
 
@@ -446,8 +452,6 @@ const SiteFellowsUI = (function () {
 
         };
 
-        //Hide the loaded if there is any
-        if (SFUtils.GetLocalStoreConfig()) SFUtils.ShowLoader(false);
     };
     //Create a modal and return its selector
     function createModalAndReturnContentSelector(title = '', footer = '') {
@@ -608,6 +612,10 @@ const SiteFellowsUI = (function () {
                 //Bing UI events and update the page after the html content is loaded
                 bindUIEvents();
                 updateUI();
+
+                //Hide the loaded if there is any
+                if (SFUtils.GetLocalStoreConfig()) SFUtils.ShowLoader(false);
+
             })
 
         },
@@ -632,6 +640,6 @@ const SiteFellowsUI = (function () {
 })();
 
 
-SFUtils.ShowLoader(true);
 SiteFellows._Init();
 SiteFellowsUI._Init();
+
