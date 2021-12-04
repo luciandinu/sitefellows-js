@@ -9,7 +9,7 @@ Alpha Stage
 
 Website head element:
 ```
-<script src="https://cdn.jsdelivr.net/gh/luciandinu/sitefellows-js/dist/sitefellows.min.js" data-site-config="your-url-to-config.json"></script>
+<script src="https://cdn.jsdelivr.net/gh/luciandinu/sitefellows-js/dist/sitefellows.min.js" data-site-config="your-site-config.json"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/luciandinu/sitefellows-js/dist/sitefellows.min.css">
 ```
 
