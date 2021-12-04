@@ -9,8 +9,8 @@ Alpha Stage
 
 Website head element:
 ```
-<script src="https://raw.githubusercontent.com/luciandinu/sitefellows-js/main/dist/sitefellows.min.js" data-site-config="your-site-config.json"></script>
-<link rel="stylesheet" href="https://raw.githubusercontent.com/luciandinu/sitefellows-js/main/dist/sitefellows.min.css">
+<script src="https://cdn.jsdelivr.net/gh/luciandinu/sitefellows-js/dist/sitefellows.min.js" data-site-config="your-site-config.json"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/luciandinu/sitefellows-js/dist/sitefellows.min.css">
 ```
 
 On protected pages additionally can be added:
