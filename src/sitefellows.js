@@ -63,6 +63,7 @@ const SFUtils = {
     //Regirect User to a specific URL
     RedirectToURL: function (url) {
         // console.log('Redirecting to:', url);
+        //Detect if is in IFRAME
         function inIframe () {
             try {
                 return window.self !== window.top;
@@ -70,7 +71,7 @@ const SFUtils = {
                 return true;
             }
         };
-
+        //Redirect
         if (inIframe()){
             window.location.replace(url);
         } else {
