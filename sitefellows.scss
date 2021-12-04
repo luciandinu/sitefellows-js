@@ -5,8 +5,8 @@
   --sf-color-text: #383838;
   --sf-color-neutral-500: #b6b6b6;
   --sf-color-neutral-300: #ededed;
-  --sf-ff-headlines: "Arial";
-  --sf-ff-text: "Arial";
+  --sf-ff-headlines: inherit;
+  --sf-ff-text: inherit;
 }
 
 .sf-form-container {
@@ -134,9 +134,10 @@
       justify-content: space-between;
       padding: 0.5rem 1rem;
       border-bottom: 1px solid var(--sf-color-neutral-300);
-      h3 {
+      .sf-title{
+        font-size: 1.2rem;
+        font-weight: bold;
         color: var(--sf-color-main);
-        font-weight: normal;
       }
       .sf-button {
         position: relative;

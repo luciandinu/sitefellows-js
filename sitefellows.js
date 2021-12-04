@@ -458,7 +458,7 @@ const SiteFellowsUI = (function () {
         <div class="sf-modal-container" ${modalID}>
         <div class="sf-modal">
             <div class="sf-header">
-                <h3>${title}</h3>
+                <p class="sf-title">${title}</p>
                 <div class="sf-button"></div>
             </div>
             <div class="sf-content"></div>

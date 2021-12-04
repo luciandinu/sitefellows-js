@@ -4,8 +4,8 @@
   --sf-color-text: #383838;
   --sf-color-neutral-500: #b6b6b6;
   --sf-color-neutral-300: #ededed;
-  --sf-ff-headlines: "Arial";
-  --sf-ff-text: "Arial";
+  --sf-ff-headlines: inherit;
+  --sf-ff-text: inherit;
 }
 
 .sf-form-container {
@@ -168,9 +168,10 @@
   border-bottom: 1px solid var(--sf-color-neutral-300);
 }
 
-.sf-modal-container .sf-modal .sf-header h3 {
+.sf-modal-container .sf-modal .sf-header .sf-title {
+  font-size: 1.2rem;
+  font-weight: bold;
   color: var(--sf-color-main);
-  font-weight: normal;
 }
 
 .sf-modal-container .sf-modal .sf-header .sf-button {
