@@ -65,7 +65,7 @@ const SFUtils = {
     },
     //Regirect User to a specific URL
     RedirectToURL: function (url) {
-        console.log('Redirecting to:', url);
+        // console.log('Redirecting to:', url);
         window.location.href = url;
     },
     //Show/Hides elements from the CSS query
@@ -74,7 +74,7 @@ const SFUtils = {
         let queryElements = document.querySelectorAll(query);
         queryElements.forEach(function (element) {
             //state ? element.classList.remove('hide') : element.classList.add('hide');
-            element.style.visibility = state ? 'visible' : 'hidden';
+            element.style.visibility = state ? 'visible' : 'hidden !important';
             element.style.display = state ? null : 'none';
         });
     },
@@ -137,7 +137,7 @@ const SiteFellows = (function () {
                 return;
             }
         });
-        //  console.log(hData);
+        // console.log(hData);
         return hMLKeyData;
     };
 
@@ -189,7 +189,7 @@ const SiteFellows = (function () {
             createScriptTag(SFConstants.FIREBASE.AuthJS, function () {
                 // Initialize Firebase
                 firebase.initializeApp(_SITEFELLOWS_CONFIG.FIREBASE);
-                console.log('initializeFirebase:', firebase);
+                // console.log('initializeFirebase:', firebase);
                 bindFirebaseOnAuthStateChangedEvent();
 
             });
@@ -208,7 +208,7 @@ const SiteFellows = (function () {
             }
 
             // Pass response to a call back func to update state
-            console.log('onAuthStateChanged', user);
+            // console.log('onAuthStateChanged', user);
 
             applyURLRules();
             SiteFellowsUI.Update();
@@ -243,7 +243,7 @@ const SiteFellows = (function () {
             .then(function (userCredential) {
                 // Signed in
                 var user = userCredential.user;
-                console.log(user);
+                // console.log(user);
                 //Store User
                 var storage = window.localStorage;
                 storage.setItem('sitefellows-user', JSON.stringify(getUserDataFromFirebaseAuthUser(user)));
@@ -320,8 +320,8 @@ const SiteFellows = (function () {
         let authUserRoles = SFUtils.GetLocalStoreUserRoles(); //should get an array
         let matchingRuleForURL = getRuleBasedOnURLPath() ? getRuleBasedOnURLPath() : null;
 
-        console.log('matchingRuleForURL', matchingRuleForURL);
-        console.log('authUserRoles', authUserRoles);
+        // console.log('matchingRuleForURL', matchingRuleForURL);
+        // console.log('authUserRoles', authUserRoles);
         //Appying the rule (if any)
         if (matchingRuleForURL) {
             if (!authUser) {
@@ -342,7 +342,7 @@ const SiteFellows = (function () {
                         return foundRole;
 
                     });
-                    console.log("foundRoles", foundRoles)
+                    // console.log("foundRoles", foundRoles)
                     //User doesn't have the appriate role case
                     if (foundRoles.length == 0) {
                         let redirectURL = _SITEFELLOWS_CONFIG.SITE.paths.restricted ? _SITEFELLOWS_CONFIG.SITE.paths.restricted : '/';
@@ -446,9 +446,9 @@ const SiteFellowsUI = (function () {
             if (SFUtils.CheckIfHTMLElementExists('.sf-register-form')) SFUtils.ShowHideElements('.sf-register-form', userData ? false : true);
 
         };
-        
+
         //Hide the loaded if there is any
-        SFUtils.ShowLoader(false);
+        if (SFUtils.GetLocalStoreConfig()) SFUtils.ShowLoader(false);
     };
     //Create a modal and return its selector
     function createModalAndReturnContentSelector(title = '', footer = '') {
@@ -472,7 +472,7 @@ const SiteFellowsUI = (function () {
         //Bind the default events
         var closeButton = document.querySelector('[' + modalID + '].sf-modal-container .sf-button');
         closeButton.addEventListener('click', function (e) {
-            console.log("bla");
+            // console.log("bla");
             modalContentElement.remove();
         })
         //var modalBackground
@@ -583,21 +583,21 @@ const SiteFellowsUI = (function () {
         document.addEventListener('sitefellow/config-loaded', function () {
             configLoaded = true;
             isConfigLoadedAndHTMLLoaded();
-            console.log('UI sitefellow/config-loaded');
+            // console.log('UI sitefellow/config-loaded');
         });
 
         document.addEventListener('DOMContentLoaded', function (e) {
             htmlLoaded = true;
             isConfigLoadedAndHTMLLoaded()
-            console.log('UI DOMContentLoaded');
+            // console.log('UI DOMContentLoaded');
         });
         function isConfigLoadedAndHTMLLoaded() {
             //Dispatch the Config+HTML Loaded Event
             if (configLoaded && htmlLoaded) {
                 const configLoadedAndHTMLLoaded = new Event('sitefellow/config-and-html-loaded');
                 document.dispatchEvent(configLoadedAndHTMLLoaded);
-                console.log("configLoaded", configLoaded, "htmlLoaded", htmlLoaded);
-                console.log('UI sitefellow/config-and-html-loaded');
+                // console.log("configLoaded", configLoaded, "htmlLoaded", htmlLoaded);
+                // console.log('UI sitefellow/config-and-html-loaded');
             }
         }
     };
