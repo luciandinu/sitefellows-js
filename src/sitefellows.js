@@ -91,7 +91,6 @@ const SFUtils = {
     },
     //Shows or hide the loaded
     ShowLoader: function (show) {
-        console.log('ShowLoader', show);
         if (show && document.body) {
             document.body.setAttribute('data-sf-loader', '');
         } else {
@@ -139,7 +138,7 @@ const SFUtils = {
 //SiteFellows
 //-----------
 const SiteFellows = (function () {
-    var _SITEFELLOWS_CONFIG;
+    //var _SITEFELLOWS_CONFIG;
 
     //Returns the value of an attribure on the head sript tage
     function getScriptAttributeData(key) {
@@ -155,7 +154,6 @@ const SiteFellows = (function () {
                 return;
             }
         });
-        // console.log(hData);
         return hMLKeyData;
     };
 
@@ -167,7 +165,7 @@ const SiteFellows = (function () {
             return await ((type = 'json') ? response.json() : response.text());
         } catch (err) {
             // There was an error
-            console.warn('File fetching error:', err);
+            // console.warn('File fetching error:', err);
         }
     };
 
@@ -188,13 +186,13 @@ const SiteFellows = (function () {
         var timestamDifference = new Date(Date.now()) - localSiteConfigTimestampDate;
 
         if (localSiteConfig && timestamDifference < 600000) {
-            _SITEFELLOWS_CONFIG = JSON.parse(localSiteConfig);
+            //_SITEFELLOWS_CONFIG = JSON.parse(localSiteConfig);
         } else {
             var serverSiteConfigData = getScriptAttributeData('data-site-config');
             var serverSiteConfig = await fetchDocumentFromURL('json', serverSiteConfigData);
             localStorage.setItem('sitefellows-config', JSON.stringify(serverSiteConfig));
             storage.setItem('sitefellows-config-timestamp', new Date(Date.now()));
-            _SITEFELLOWS_CONFIG = serverSiteConfig;
+            //_SITEFELLOWS_CONFIG = serverSiteConfig;
 
         }
 
@@ -206,7 +204,8 @@ const SiteFellows = (function () {
         createScriptTag(SFConstants.FIREBASE.AppJs, function () {
             createScriptTag(SFConstants.FIREBASE.AuthJS, function () {
                 // Initialize Firebase
-                firebase.initializeApp(_SITEFELLOWS_CONFIG.FIREBASE);
+                //firebase.initializeApp(_SITEFELLOWS_CONFIG.FIREBASE);
+                firebase.initializeApp(SFUtils.GetLocalStoreConfig().FIREBASE);
                 // console.log('initializeFirebase:', firebase);
                 bindFirebaseOnAuthStateChangedEvent();
 
@@ -275,7 +274,7 @@ const SiteFellows = (function () {
             .catch(function (error) {
                 var errorCode = error.code;
                 var errorMessage = error.message;
-                console.warn('Firebase login error:', errorCode, errorMessage);
+                // console.warn('Firebase login error:', errorCode, errorMessage);
                 //Dispatch Login Error Event
                 const loginErrorEvent = new CustomEvent('sitefellows/login-error', { detail: errorMessage });
                 document.dispatchEvent(loginErrorEvent);
@@ -292,10 +291,16 @@ const SiteFellows = (function () {
             // An error happened.
         });
     };
-
+    //Add the Default Role and returns the new array
+    function addDefaultRoleToRolesArray(roles){
+        var authUserRoles = roles ? roles : [];
+        if (authUserRoles.includes('authenticated') === false) authUserRoles.push('authenticated');
+        return authUserRoles;
+    };
     //Check path if matches the rules
     function getRuleBasedOnURLPath() {
-        var rules = _SITEFELLOWS_CONFIG.SITE.rules;
+        //var rules = _SITEFELLOWS_CONFIG.SITE.rules;
+        var rules = SFUtils.GetLocalStoreConfig().SITE.rules;
         // console.log('Rules:', rules);
 
         var searchResults = []; //this is where we store the results
@@ -305,7 +310,7 @@ const SiteFellows = (function () {
                 case 'exact':
                     if (matchExactString(rule.path, currentPath)) searchResults.push({ roles: rule.roles, ranking: 2, path: rule.path });
                     break;
-                case 'starstwith':
+                case 'startswith':
                     if (currentPath.startsWith(rule.path)) searchResults.push({ roles: rule.roles, ranking: 1, path: rule.path });
                     break;
             }
@@ -313,7 +318,7 @@ const SiteFellows = (function () {
 
         //Get the most specific match
         if (searchResults.length > 0) {
-            // console.log(searchResults);
+            //// console.log(searchResults);
             var maxRanking = 0;
             var bestMatchingPath = 0;
             var bestRule;
@@ -327,7 +332,7 @@ const SiteFellows = (function () {
             });
             return {
                 path: bestRule.path,
-                roles: bestRule.roles
+                roles: addDefaultRoleToRolesArray(bestRule.roles)
             }
         }
         return;
@@ -335,20 +340,25 @@ const SiteFellows = (function () {
 
     function applyURLRules() {
         let authUser = SFUtils.GetLocalStoreUser(); //should get an object
-        let authUserRoles = SFUtils.GetLocalStoreUserRoles(); //should get an array
+        let authUserRoles = SFUtils.GetLocalStoreUserRoles() ? SFUtils.GetLocalStoreUserRoles() : []; //should get an array
         let matchingRuleForURL = getRuleBasedOnURLPath() ? getRuleBasedOnURLPath() : null;
 
-        // console.log('matchingRuleForURL', matchingRuleForURL);
-        // console.log('authUserRoles', authUserRoles);
+        authUserRoles = addDefaultRoleToRolesArray(authUserRoles);
+        console.log('authUser', authUser);
+        console.log('matchingRuleForURL', matchingRuleForURL);
+        console.log('authUserRoles', authUserRoles);
+
         //Appying the rule (if any)
         if (matchingRuleForURL) {
             if (!authUser) {
                 //User is not authenticated case
-                let redirectURL = _SITEFELLOWS_CONFIG.SITE.paths.login ? _SITEFELLOWS_CONFIG.SITE.paths.login : '/';
-                // console.log("Redirect to login", redirectURL);
+                //let redirectURL = _SITEFELLOWS_CONFIG.SITE.paths.login ? _SITEFELLOWS_CONFIG.SITE.paths.login : '/';
+                let redirectURL = SFUtils.GetLocalStoreConfig().SITE.paths.login ? SFUtils.GetLocalStoreConfig().SITE.paths.login : '/';
+                //console.log("Redirect to login", redirectURL);
                 SFUtils.RedirectToURL(redirectURL);
             } else {
                 //User is authenticated case
+                console.log("User is authenticated case");
                 if (authUserRoles) {
                     var foundRoles = authUserRoles.filter(function (authRole) {
                         let foundRole;
@@ -360,10 +370,11 @@ const SiteFellows = (function () {
                         return foundRole;
 
                     });
-                    // console.log("foundRoles", foundRoles)
+                    console.log("foundRoles", foundRoles)
                     //User doesn't have the appriate role case
-                    if (foundRoles.length == 0) {
-                        let redirectURL = _SITEFELLOWS_CONFIG.SITE.paths.restricted ? _SITEFELLOWS_CONFIG.SITE.paths.restricted : '/';
+                    if (foundRoles.length < matchingRuleForURL.roles.length) {
+                        //let redirectURL = _SITEFELLOWS_CONFIG.SITE.paths.restricted ? _SITEFELLOWS_CONFIG.SITE.paths.restricted : '/';
+                        let redirectURL = SFUtils.GetLocalStoreConfig().SITE.paths.restricted ? SFUtils.GetLocalStoreConfig().SITE.paths.restricted : '/';
                         // console.log("Redirect to restricted", redirectURL);
                         SFUtils.RedirectToURL(redirectURL);
                     }
@@ -413,7 +424,7 @@ const SiteFellows = (function () {
             var storage = window.localStorage;
             storage.removeItem('sitefellows-config');
             storage.removeItem('sitefellows-config-timestamp');
-            storage.removeItem('sitefellows-user');
+            //storage.removeItem('sitefellows-user');
             firebaseSignOut();
         }
     }
@@ -540,6 +551,10 @@ const SiteFellowsUI = (function () {
                     formSubmitSignature = formID;
                     SiteFellows.UserLoginWithEmail(loginEmail.value, loginPass.value, redirectOnSuccessURL);
                 };
+            });
+            //Enter pressed
+            loginForm.addEventListener('keyup', function(e){
+                if (e.keyCode === 13) loginButton.click();
             });
             //Handle Login Error
             document.addEventListener('sitefellows/login-error', function (e) {
