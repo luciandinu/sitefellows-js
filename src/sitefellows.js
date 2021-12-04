@@ -2,10 +2,7 @@
 const SFConstants = {
     //Site config
     SITE: {},
-    //Usign Firebase SDK 7.9.1
     FIREBASE: {
-        // AppJs: "https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js",
-        // AuthJS: "https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"
         //Usign Firebase SDK 8.10.0
         AppJs: "https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js",
         AuthJS: "https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"
