@@ -16,7 +16,6 @@ Website head element:
 On protected pages additionally can be added:
 ```
 <noscript>
-    <style>html:not(.edit){display:none;}</style>
     <meta http-equiv="refresh" content="0;url=/examples/simple/" />
 </noscript>
 ```
