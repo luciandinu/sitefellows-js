@@ -213,7 +213,7 @@ const SiteFellows = (function () {
             applyURLRules();
             SiteFellowsUI.Update();
 
-            SFUtils.ShowLoader(false);
+
 
         });
     }
@@ -446,6 +446,9 @@ const SiteFellowsUI = (function () {
             if (SFUtils.CheckIfHTMLElementExists('.sf-register-form')) SFUtils.ShowHideElements('.sf-register-form', userData ? false : true);
 
         };
+        
+        //Hide the loaded if there is any
+        SFUtils.ShowLoader(false);
     };
     //Create a modal and return its selector
     function createModalAndReturnContentSelector(title = '', footer = '') {
