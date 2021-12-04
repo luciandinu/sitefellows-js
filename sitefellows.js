@@ -427,27 +427,25 @@ const SiteFellowsUI = (function () {
         var storage = window.localStorage;
         let userData = SFUtils.GetLocalStoreUser();
 
-        //Remove all modals
-        let allModals = document.querySelectorAll('.sf-generated-modal');
-        allModals.forEach(function (modalElement) {
-            modalElement.remove();
-        });
+        //If we are in a CMS ditor we exit
+        if (!SFUtils.IsInCMSEditor(SFUtils.GetLocalStoreConfig().SITE.options.cmsCompatibility)) {
 
-        //if (!SFUtils.IsInCMSEditor('sitejet')) {
-        //Check Links/Buttons
-        if (SFUtils.CheckIfHTMLElementExists('[href="#sf-login"]')) SFUtils.ShowHideElements('[href="#sf-login"]', userData ? false : true);
-        if (SFUtils.CheckIfHTMLElementExists('[href="#sf-login-modal"]')) SFUtils.ShowHideElements('[href="#sf-login-modal"]', userData ? false : true);
-        if (SFUtils.CheckIfHTMLElementExists('[href="#sf-register"]')) SFUtils.ShowHideElements('[href="#sf-register"]', userData ? false : true);
-        if (SFUtils.CheckIfHTMLElementExists('[href="#sf-logout"]')) SFUtils.ShowHideElements('[href="#sf-logout"]', userData ? true : false);
-        //Check Forms
-        if (SFUtils.CheckIfHTMLElementExists('.sf-login-form')) SFUtils.ShowHideElements('.sf-login-form', userData ? false : true);
-        if (SFUtils.CheckIfHTMLElementExists('.sf-register-form')) SFUtils.ShowHideElements('.sf-register-form', userData ? false : true);
+            //Remove all modals
+            let allModals = document.querySelectorAll('.sf-generated-modal');
+            allModals.forEach(function (modalElement) {
+                modalElement.remove();
+            });
 
-        //}
+            //Check Links/Buttons
+            if (SFUtils.CheckIfHTMLElementExists('[href="#sf-login"]')) SFUtils.ShowHideElements('[href="#sf-login"]', userData ? false : true);
+            if (SFUtils.CheckIfHTMLElementExists('[href="#sf-login-modal"]')) SFUtils.ShowHideElements('[href="#sf-login-modal"]', userData ? false : true);
+            if (SFUtils.CheckIfHTMLElementExists('[href="#sf-register"]')) SFUtils.ShowHideElements('[href="#sf-register"]', userData ? false : true);
+            if (SFUtils.CheckIfHTMLElementExists('[href="#sf-logout"]')) SFUtils.ShowHideElements('[href="#sf-logout"]', userData ? true : false);
+            //Check Forms
+            if (SFUtils.CheckIfHTMLElementExists('.sf-login-form')) SFUtils.ShowHideElements('.sf-login-form', userData ? false : true);
+            if (SFUtils.CheckIfHTMLElementExists('.sf-register-form')) SFUtils.ShowHideElements('.sf-register-form', userData ? false : true);
 
-        //For fast loading disable the loader here
-        //SFUtils.ShowLoader(false);
-
+        };
     };
     //Create a modal and return its selector
     function createModalAndReturnContentSelector(title = '', footer = '') {
@@ -551,23 +549,27 @@ const SiteFellowsUI = (function () {
     };
     //Bind all elements events
     function bindUIEvents() {
-        //Login + Register Buttons for redirect
-        bindClickToSiteRedirect('[href="#sf-login"]', 'login');
-        bindClickToSiteRedirect('[href="#sf-register"]', 'register');
-        bindClickToSiteRedirect('[href="#sf-logout"]', '', function () {
-            SiteFellows.UserSignOut();
-        });
+        //If we are in a CMS ditor we exit
+        if (!SFUtils.IsInCMSEditor(SFUtils.GetLocalStoreConfig().SITE.options.cmsCompatibility)) {
 
-        //Login Modal Button
-        let loginModalSelector = '[href="#sf-login-modal"]';
-        if (SFUtils.CheckIfHTMLElementExists(loginModalSelector)) {
-            let loginModalButton = document.querySelector(loginModalSelector);
-            loginModalButton.addEventListener('click', function (e) {
-                let loginContentSelector = createModalAndReturnContentSelector('Login');
-                renderLogin(loginContentSelector);
-                e.preventDefault();
-                e.stopPropagation();
-            })
+            //Login + Register Buttons for redirect
+            bindClickToSiteRedirect('[href="#sf-login"]', 'login');
+            bindClickToSiteRedirect('[href="#sf-register"]', 'register');
+            bindClickToSiteRedirect('[href="#sf-logout"]', '', function () {
+                SiteFellows.UserSignOut();
+            });
+
+            //Login Modal Button
+            let loginModalSelector = '[href="#sf-login-modal"]';
+            if (SFUtils.CheckIfHTMLElementExists(loginModalSelector)) {
+                let loginModalButton = document.querySelector(loginModalSelector);
+                loginModalButton.addEventListener('click', function (e) {
+                    let loginContentSelector = createModalAndReturnContentSelector('Login');
+                    renderLogin(loginContentSelector);
+                    e.preventDefault();
+                    e.stopPropagation();
+                })
+            }
         }
     };
     //Check if Config + HTML is loaded - if true it will raise an Event
@@ -591,7 +593,7 @@ const SiteFellowsUI = (function () {
             if (configLoaded && htmlLoaded) {
                 const configLoadedAndHTMLLoaded = new Event('sitefellow/config-and-html-loaded');
                 document.dispatchEvent(configLoadedAndHTMLLoaded);
-                console.log("configLoaded", configLoaded, "htmlLoaded",htmlLoaded);
+                console.log("configLoaded", configLoaded, "htmlLoaded", htmlLoaded);
                 console.log('UI sitefellow/config-and-html-loaded');
             }
         }
@@ -602,11 +604,8 @@ const SiteFellowsUI = (function () {
             checkIfConfigLoadedAndHTMLIsLoaded();
             document.addEventListener('sitefellow/config-and-html-loaded', function () {
                 //Bing UI events and update the page after the html content is loaded
-                //If we are in a CMS ditor we exit
-                if (!SFUtils.IsInCMSEditor(SFUtils.GetLocalStoreConfig().SITE.options.cmsCompatibility)) {
-                    bindUIEvents();
-                    updateUI();
-                };
+                bindUIEvents();
+                updateUI();
             })
 
         },
