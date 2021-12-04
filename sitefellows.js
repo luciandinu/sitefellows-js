@@ -15,7 +15,9 @@ const SFConstants = {
     },
     EVENTS: {
         loginSuccess: "sitefellows/login",
-        loginError: "sitefellows/login-error"
+        loginError: "sitefellows/login-error",
+        configLoaded: "sitefellow/config-loaded",
+        configLoadedAndHTMLLoaded: "sitefellow/config-and-html-loaded"
     }
 
 }
@@ -175,7 +177,10 @@ const SiteFellows = (function () {
             localStorage.setItem('sitefellows-config', JSON.stringify(serverSiteConfig));
             storage.setItem('sitefellows-config-timestamp', new Date(Date.now()));
             _SITEFELLOWS_CONFIG = serverSiteConfig;
+
         }
+
+
     };
 
     //Initializa Firebase
@@ -192,25 +197,38 @@ const SiteFellows = (function () {
 
     };
 
-    function bindFirebaseOnAuthStateChangedEvent(){
+    function bindFirebaseOnAuthStateChangedEvent() {
         firebase.auth().onAuthStateChanged((user) => {
-                //Store User
-                var storage = window.localStorage;
-                if (user){
-                    storage.setItem('sitefellows-user', JSON.stringify(user));
-                } else {
-                    storage.removeItem('sitefellows-user');
-                }
+            //Store User
+            var storage = window.localStorage;
+            if (user) {
+                storage.setItem('sitefellows-user', JSON.stringify(getUserDataFromFirebaseAuthUser(user)));
+            } else {
+                storage.removeItem('sitefellows-user');
+            }
 
             // Pass response to a call back func to update state
-            console.log('onAuthStateChanged',user);
+            console.log('onAuthStateChanged', user);
 
             applyURLRules();
             SiteFellowsUI.Update();
 
-            SFUtils.ShowLoader(false);;
+            SFUtils.ShowLoader(false);
 
         });
+    }
+    //Helper function to return the user data as an object from the entire Firebase User Object
+    function getUserDataFromFirebaseAuthUser(firebaseUser) {
+        return firebaseUser ? {
+            displayName: firebaseUser.displayName,
+            email: firebaseUser.email,
+            emailVerified: firebaseUser.emailVerified,
+            photoURL: firebaseUser.photoURL,
+            creationTime: firebaseUser.metadata.creationTime,
+            lastSignInTime: firebaseUser.metadata.lastSignInTime,
+            uid: firebaseUser.uid,
+            refreshToken: firebaseUser.refreshToken
+        } : null;
     }
 
     //Helper function to match an exact string
@@ -228,7 +246,7 @@ const SiteFellows = (function () {
                 console.log(user);
                 //Store User
                 var storage = window.localStorage;
-                storage.setItem('sitefellows-user', JSON.stringify(user));
+                storage.setItem('sitefellows-user', JSON.stringify(getUserDataFromFirebaseAuthUser(user)));
                 //Dispatch Login Success Event
                 const loginSuccessEvent = new CustomEvent('sitefellows/login');
                 document.dispatchEvent(loginSuccessEvent);
@@ -300,10 +318,10 @@ const SiteFellows = (function () {
     function applyURLRules() {
         let authUser = SFUtils.GetLocalStoreUser(); //should get an object
         let authUserRoles = SFUtils.GetLocalStoreUserRoles(); //should get an array
-        let matchingRuleForURL = getRuleBasedOnURLPath() ? getRuleBasedOnURLPath(): null;
+        let matchingRuleForURL = getRuleBasedOnURLPath() ? getRuleBasedOnURLPath() : null;
 
-        console.log('matchingRuleForURL',matchingRuleForURL);
-        console.log('authUserRoles',authUserRoles);
+        console.log('matchingRuleForURL', matchingRuleForURL);
+        console.log('authUserRoles', authUserRoles);
         //Appying the rule (if any)
         if (matchingRuleForURL) {
             if (!authUser) {
@@ -313,7 +331,7 @@ const SiteFellows = (function () {
                 SFUtils.RedirectToURL(redirectURL);
             } else {
                 //User is authenticated case
-                if (authUserRoles){
+                if (authUserRoles) {
                     var foundRoles = authUserRoles.filter(function (authRole) {
                         let foundRole;
                         if (matchingRuleForURL.roles) {
@@ -322,7 +340,7 @@ const SiteFellows = (function () {
                             })
                         };
                         return foundRole;
-    
+
                     });
                     console.log("foundRoles", foundRoles)
                     //User doesn't have the appriate role case
@@ -343,17 +361,32 @@ const SiteFellows = (function () {
 
             await initializeConfig();
 
-            if (_SITEFELLOWS_CONFIG) {
-                initializeFirebase();
-                //Apply URL rules
-                applyURLRules();
-            }
+            //Dispatch the Config Loaded Event
+            const configLoadedEvent = new Event('sitefellow/config-loaded');
+            document.dispatchEvent(configLoadedEvent);
+
+            //Initialize Firebase Auth
+            initializeFirebase();
+
+            document.addEventListener('sitefellow/config-loaded', function () {
+
+                //If we are in a CMS ditor we exit
+                if (!SFUtils.IsInCMSEditor(SFUtils.GetLocalStoreConfig().SITE.options.cmsCompatibility)) {
+
+                    //Apply URL rules
+                    applyURLRules();
+                };
+
+
+            });
+
+
 
         },
         UserLoginWithEmail: function (email, password, redirectOnSuccessURL) {
             firebaseSignInWithEmail(email, password, redirectOnSuccessURL);
         },
-        UserSignOut:function(){
+        UserSignOut: function () {
             firebaseSignOut();
         },
         //Clear Local Storage
@@ -411,7 +444,7 @@ const SiteFellowsUI = (function () {
         if (SFUtils.CheckIfHTMLElementExists('.sf-register-form')) SFUtils.ShowHideElements('.sf-register-form', userData ? false : true);
 
         //}
-        
+
         //For fast loading disable the loader here
         //SFUtils.ShowLoader(false);
 
@@ -521,7 +554,7 @@ const SiteFellowsUI = (function () {
         //Login + Register Buttons for redirect
         bindClickToSiteRedirect('[href="#sf-login"]', 'login');
         bindClickToSiteRedirect('[href="#sf-register"]', 'register');
-        bindClickToSiteRedirect('[href="#sf-logout"]', '', function(){
+        bindClickToSiteRedirect('[href="#sf-logout"]', '', function () {
             SiteFellows.UserSignOut();
         });
 
@@ -536,13 +569,46 @@ const SiteFellowsUI = (function () {
                 e.stopPropagation();
             })
         }
-    }
+    };
+    //Check if Config + HTML is loaded - if true it will raise an Event
+    function checkIfConfigLoadedAndHTMLIsLoaded() {
+        //Check if Config + HTML is loaded
+        var configLoaded = false;
+        var htmlLoaded = false;
+        document.addEventListener('sitefellow/config-loaded', function () {
+            configLoaded = true;
+            isConfigLoadedAndHTMLLoaded();
+            console.log('UI sitefellow/config-loaded');
+        });
+
+        document.addEventListener('DOMContentLoaded', function (e) {
+            htmlLoaded = true;
+            isConfigLoadedAndHTMLLoaded()
+            console.log('UI DOMContentLoaded');
+        });
+        function isConfigLoadedAndHTMLLoaded() {
+            //Dispatch the Config+HTML Loaded Event
+            if (configLoaded && htmlLoaded) {
+                const configLoadedAndHTMLLoaded = new Event('sitefellow/config-and-html-loaded');
+                document.dispatchEvent(configLoadedAndHTMLLoaded);
+                console.log("configLoaded", configLoaded, "htmlLoaded",htmlLoaded);
+                console.log('UI sitefellow/config-and-html-loaded');
+            }
+        }
+    };
     return {
         _Init: function () {
-            document.addEventListener('DOMContentLoaded', function (e) {
-                bindUIEvents();
-                updateUI();
+            //Make sure that we've loaded the Config + HTML
+            checkIfConfigLoadedAndHTMLIsLoaded();
+            document.addEventListener('sitefellow/config-and-html-loaded', function () {
+                //Bing UI events and update the page after the html content is loaded
+                //If we are in a CMS ditor we exit
+                if (!SFUtils.IsInCMSEditor(SFUtils.GetLocalStoreConfig().SITE.options.cmsCompatibility)) {
+                    bindUIEvents();
+                    updateUI();
+                };
             })
+
         },
         //Render the login form in the container selector
         //Redirects to url after successful login
