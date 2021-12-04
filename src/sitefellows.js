@@ -63,7 +63,20 @@ const SFUtils = {
     //Regirect User to a specific URL
     RedirectToURL: function (url) {
         // console.log('Redirecting to:', url);
-        window.location.href = url;
+        function inIframe () {
+            try {
+                return window.self !== window.top;
+            } catch (e) {
+                return true;
+            }
+        };
+
+        if (inIframe()){
+            window.location.replace(url);
+        } else {
+            window.location.href = url;
+        }
+        
     },
     //Show/Hides elements from the CSS query
     //State true = visible; false = not visible
