@@ -227,8 +227,10 @@ const SiteFellows = (function () {
             // Pass response to a call back func to update state
             // console.log('onAuthStateChanged', user);
 
-            applyURLRules();
-            SiteFellowsUI.Update();
+            if(SFUtils.GetLocalStoreConfig()){
+                applyURLRules();
+                SiteFellowsUI.Update();    
+            }
 
 
 
@@ -424,7 +426,7 @@ const SiteFellows = (function () {
             var storage = window.localStorage;
             storage.removeItem('sitefellows-config');
             storage.removeItem('sitefellows-config-timestamp');
-            //storage.removeItem('sitefellows-user');
+            storage.removeItem('sitefellows-user');
             firebaseSignOut();
         }
     }
