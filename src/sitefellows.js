@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, signOut, onAuthStateChanged ,signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signOut, onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 
 import SFC from "./constants";
 import Utils from "./utils";
@@ -45,7 +45,7 @@ function createScriptTag(url, callback) {
 };
 
 //Insert the default CSS for the forms
-function insertDefaultCSS(callback){
+function insertDefaultCSS(callback) {
     var cssTag = document.createElement('style');
     cssTag.setAttribute('id', 'sf-default-css');
     cssTag.innerHTML = SFC.CSS;
@@ -57,7 +57,7 @@ function insertDefaultCSS(callback){
 async function initializeConfig() {
     var localSiteConfig = LocalStore.ConfigData;
     var localSiteConfigTimestamp = LocalStore.ConfigDataTimestamp;
-    
+
 
     var localSiteConfigTimestampDate = localSiteConfigTimestamp ? new Date(localSiteConfigTimestamp) : null;
     var timestampDifference = new Date(Date.now()) - localSiteConfigTimestampDate;
@@ -76,7 +76,7 @@ async function initializeConfig() {
 
 //Initialize Firebase
 function initializeFirebase() {
-    
+
     //Initializa Firebase
     initializeApp(LocalStore.ConfigData.FIREBASE);
 
@@ -84,15 +84,18 @@ function initializeFirebase() {
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
         //Store User
-        var storage = window.localStorage;
+        //var storage = window.localStorage;
         if (user) {
-            storage.setItem('sitefellows-user', JSON.stringify(getUserDataFromFirebaseAuthUserObject(user)));
+            LocalStore.UserData = getUserDataFromFirebaseAuthUserObject(user);
+            //storage.setItem('sitefellows-user', JSON.stringify());
         } else {
-            storage.removeItem('sitefellows-user');
+            LocalStore.UserData = null;
+            //storage.removeItem('sitefellows-user');
         }
 
         if (LocalStore.ConfigData) {
             applyURLRules();
+            applyCSSRules();
             SiteFellowsUI.Update();
         }
     });
@@ -152,8 +155,7 @@ function firebaseSignOut() {
     const auth = getAuth();
     signOut(auth).then(function () {
         // Sign-out successful.
-        var storage = window.localStorage;
-        storage.removeItem('sitefellows-user');
+        LocalStore.UserData = null;
     }, function (error) {
         // An error happened.
     });
@@ -213,21 +215,16 @@ function applyURLRules() {
     let matchingRuleForURL = getRuleBasedOnURLPath();
 
     authUserRoles = addDefaultRoleToRolesArray(authUserRoles);
-    console.log('authUser', authUser);
-    console.log('matchingRuleForURL', matchingRuleForURL);
-    console.log('authUserRoles', authUserRoles);
 
     //Appying the rule (if any)
     if (matchingRuleForURL) {
         if (!authUser) {
             //User is not authenticated case
-            //let redirectURL = _SITEFELLOWS_CONFIG.SITE.paths.login ? _SITEFELLOWS_CONFIG.SITE.paths.login : '/';
             let redirectURL = LocalStore.ConfigData.SITE.paths.login ? LocalStore.ConfigData.SITE.paths.login : '/';
-            //console.log("Redirect to login", redirectURL);
+            console.log("Redirect to login", redirectURL);
             Utils.RedirectToURL(redirectURL);
         } else {
             //User is authenticated case
-            console.log("User is authenticated case");
             if (authUserRoles) {
                 var foundRoles = authUserRoles.filter(function (authRole) {
                     let foundRole;
@@ -239,12 +236,10 @@ function applyURLRules() {
                     return foundRole;
 
                 });
-                console.log("foundRoles", foundRoles)
                 //User doesn't have the appriate role case
                 if (foundRoles.length < matchingRuleForURL.roles.length) {
-                    //let redirectURL = _SITEFELLOWS_CONFIG.SITE.paths.restricted ? _SITEFELLOWS_CONFIG.SITE.paths.restricted : '/';
                     let redirectURL = LocalStore.ConfigData.SITE.paths.restricted ? LocalStore.ConfigData.SITE.paths.restricted : '/';
-                    // console.log("Redirect to restricted", redirectURL);
+                    console.log("Redirect to restricted", redirectURL);
                     Utils.RedirectToURL(redirectURL);
                 }
             }
@@ -254,13 +249,56 @@ function applyURLRules() {
 
 };
 
+function applyCSSRules() {
+    let defaultCSSSelectors = [
+        {
+            authenticated: false,
+            selectors: [
+                '[href="#sf-login"]',
+                '.sf-login-form',
+                '[href="#sf-login-modal"]',
+                '[href="#sf-register"]',
+                '.sf-register-form'
+            ]
+        },
+        {
+            authenticated: true,
+            selectors: [
+                '[href="#sf-logout"]'
+            ]
+        }
+    ]
+    let isUserAuthenticated = LocalStore.UserData ? true : false;
+    //Searching
+    let foundSelectors = defaultCSSSelectors.filter(function (selector) {
+        return (isUserAuthenticated == !selector.authenticated);
+    });
+
+    //Getting the acutal selectors
+    let allCSSSelectors = foundSelectors.flat().map(function (selector) { return selector.selectors });
+
+    let css = `
+    ${allCSSSelectors.join(",")} {
+        display: none !important;
+    }
+    `;
+
+    var cssTag = Utils.DoesHTMLElementExists('#sf-css') ? document.head.querySelector('#sf-css') : document.createElement('style');
+    cssTag.setAttribute('id', 'sf-css');
+    cssTag.innerHTML = css;
+    //if (callback) cssTag.onload = callback;
+    document.head.appendChild(cssTag);
+};
+
 //-----------
 //SiteFellows
 //-----------
 const SiteFellows = {
     _Init: async function () {
-        
+
         insertDefaultCSS();
+        applyCSSRules();
+
         await initializeConfig();
 
         //Dispatch the Config Loaded Event

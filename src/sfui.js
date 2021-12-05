@@ -22,8 +22,6 @@ function checkIfEmailFieldIsValid(fieldSelector, errorMessageSelector, message) 
 };
 //Cycle function - can be run every time we need to update what it's on the page
 function updateUI() {
-    let userData = LocalStore.UserData;
-    
 
     //If we are in a CMS ditor we exit
     if (!Utils.IsInCMSEditor(LocalStore.ConfigData.SITE.options.cmsCompatibility)) {
@@ -33,15 +31,6 @@ function updateUI() {
         allModals.forEach(function (modalElement) {
             modalElement.remove();
         });
-
-        //Check Links/Buttons
-        if (Utils.DoesHTMLElementExists('[href="#sf-login"]')) Utils.ShowHideElements('[href="#sf-login"]', userData ? false : true);
-        if (Utils.DoesHTMLElementExists('[href="#sf-login-modal"]')) Utils.ShowHideElements('[href="#sf-login-modal"]', userData ? false : true);
-        if (Utils.DoesHTMLElementExists('[href="#sf-register"]')) Utils.ShowHideElements('[href="#sf-register"]', userData ? false : true);
-        if (Utils.DoesHTMLElementExists('[href="#sf-logout"]')) Utils.ShowHideElements('[href="#sf-logout"]', userData ? true : false);
-        //Check Forms
-        if (Utils.DoesHTMLElementExists('.sf-login-form')) Utils.ShowHideElements('.sf-login-form', userData ? false : true);
-        if (Utils.DoesHTMLElementExists('.sf-register-form')) Utils.ShowHideElements('.sf-register-form', userData ? false : true);
 
     };
 
