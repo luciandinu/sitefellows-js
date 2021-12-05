@@ -9,8 +9,7 @@ Alpha Stage
 
 Website head element:
 ```
-<script src="https://sf-js-lib.surge.sh/sitefellows.min.js" data-site-config="your-site-config.json"></script>
-<link rel="stylesheet" href="https://sf-js-lib.surge.sh/sitefellows.min.css">
+<script src="https://sf-js-lib.surge.sh/sitefellows.js" data-site-config="your-site-config.json"></script>
 ```
 
 On protected pages additionally can be added:
@@ -22,4 +21,4 @@ On protected pages additionally can be added:
 
 ## Requirements
 
- - Firebase Authentification - for user authenthification
+ - Firebase Authentification - for User Authentification
