@@ -250,21 +250,24 @@ function applyURLRules() {
 };
 
 function applyCSSRules() {
+    //What do we hide
     let defaultCSSSelectors = [
         {
             authenticated: false,
             selectors: [
-                '[href="#sf-login"]',
+                '[href$="#sf-login"]',
                 '.sf-login-form',
-                '[href="#sf-login-modal"]',
-                '[href="#sf-register"]',
-                '.sf-register-form'
+                '[href$="#sf-login-modal"]',
+                '[href$="#sf-register"]',
+                '.sf-register-form',
+                '.sf-public-content-only'
             ]
         },
         {
             authenticated: true,
             selectors: [
-                '[href="#sf-logout"]'
+                '[href$="#sf-logout"]',
+                '.sf-authenticated-content-only'
             ]
         }
     ]
@@ -280,6 +283,7 @@ function applyCSSRules() {
     let css = `
     ${allCSSSelectors.join(",")} {
         display: none !important;
+        visibility: hidden !important;
     }
     `;
 
