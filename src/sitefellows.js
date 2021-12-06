@@ -303,11 +303,6 @@ const SiteFellows = {
         //Initialize Firebase Auth
         initializeFirebase();
 
-        //We reaply the CSS rules on document load
-        // document.addEventListener("DOMContentLoaded", function () {
-        //     applyCSSRules();
-        // });
-
         //Apply UR rules
         applyURLRules();
 
