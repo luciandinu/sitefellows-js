@@ -6,19 +6,53 @@ import SFC from "./constants";
 function b2a(a) {
     var c, d, e, f, g, h, i, j, o, b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=", k = 0, l = 0, m = "", n = [];
     if (!a) return a;
-    do c = a.charCodeAt(k++), d = a.charCodeAt(k++), e = a.charCodeAt(k++), j = c << 16 | d << 8 | e, 
-    f = 63 & j >> 18, g = 63 & j >> 12, h = 63 & j >> 6, i = 63 & j, n[l++] = b.charAt(f) + b.charAt(g) + b.charAt(h) + b.charAt(i); while (k < a.length);
-    return m = n.join(""), o = a.length % 3, (o ? m.slice(0, o - 3) :m) + "===".slice(o || 3);
-  }
-  
-  function a2b(a) {
+    do c = a.charCodeAt(k++), d = a.charCodeAt(k++), e = a.charCodeAt(k++), j = c << 16 | d << 8 | e,
+        f = 63 & j >> 18, g = 63 & j >> 12, h = 63 & j >> 6, i = 63 & j, n[l++] = b.charAt(f) + b.charAt(g) + b.charAt(h) + b.charAt(i); while (k < a.length);
+    return m = n.join(""), o = a.length % 3, (o ? m.slice(0, o - 3) : m) + "===".slice(o || 3);
+}
+
+function a2b(a) {
     var b, c, d, e = {}, f = 0, g = 0, h = "", i = String.fromCharCode, j = a.length;
     for (b = 0; 64 > b; b++) e["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(b)] = b;
-    for (c = 0; j > c; c++) for (b = e[a.charAt(c)], f = (f << 6) + b, g += 6; g >= 8; ) ((d = 255 & f >>> (g -= 8)) || j - 2 > c) && (h += i(d));
+    for (c = 0; j > c; c++) for (b = e[a.charAt(c)], f = (f << 6) + b, g += 6; g >= 8;) ((d = 255 & f >>> (g -= 8)) || j - 2 > c) && (h += i(d));
     return h;
-  }
+}
 //--------------------
 
+//Returns true if the code is running inside the CMS Editor
+function _isInCMSEditor(cms) {
+    switch (cms.toLowerCase()) {
+        case SFC.CMS_COMPATIBILITY.sitejet:
+            return window['editor'] ? true : false;
+        default:
+            return false;
+    }
+};
+
+//Returns the value of an attribure on the head sript tage
+function _getScriptAttributeData(key) {
+    var docH = document.head;
+    var hMLKeyData;
+
+    var sElements = docH.querySelectorAll('script');
+
+    sElements.forEach(function (sElement) {
+        var mlKey = sElement.getAttribute(key);
+        if (mlKey) {
+            hMLKeyData = mlKey;
+            return;
+        }
+    });
+    return hMLKeyData;
+};
+
+//Returns true is we are not in a CMS editor
+function _isNotInCMS() {
+    //We apply the CSS rules
+    var siteCompatibility = Utils.GetScriptAttributeData('data-site-compatibility') ? Utils.GetScriptAttributeData('data-site-compatibility') : 'none';
+    //console.log('isNotInCMS SiteFellows', !Utils.IsInCMSEditor(siteCompatibility));
+    return !Utils.IsInCMSEditor(siteCompatibility);
+};
 
 // Utils
 const Utils = {
@@ -51,22 +85,11 @@ const Utils = {
     B64Decode: function (string) {
         return decodeURIComponent(escape(atob(string)));
     },
-    //Returns the value of an attribure on the head sript tage
+
     GetScriptAttributeData: function (key) {
-        var docH = document.head;
-        var hMLKeyData;
-
-        var sElements = docH.querySelectorAll('script');
-
-        sElements.forEach(function (sElement) {
-            var mlKey = sElement.getAttribute(key);
-            if (mlKey) {
-                hMLKeyData = mlKey;
-                return;
-            }
-        });
-        return hMLKeyData;
+        return _getScriptAttributeData(key);
     },
+
     //Returns true if an HTML element exists
     DoesHTMLElementExists: function (selector) {
         return document.querySelectorAll(selector).length ? true : false;
@@ -113,22 +136,14 @@ const Utils = {
         });
     },
 
-
-    //Returns true if the code is running inside the CMS Editor
     IsInCMSEditor: function (cms) {
-        switch (cms.toLowerCase()) {
-            case SFC.CMS_COMPATIBILITY.sitejet:
-                return window['editor'] ? true : false;
-            default:
-                return false;
-        }
+        return _isInCMSEditor(cms);
+    },
+
+    IsNotInCMS : function(){
+        return _isNotInCMS();
     }
 };
 
-
-
-
-// window['Utils']= Utils;
-// export default window['Utils'];
 
 export default Utils;

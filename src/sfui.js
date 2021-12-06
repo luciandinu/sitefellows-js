@@ -23,19 +23,11 @@ function checkIfEmailFieldIsValid(fieldSelector, errorMessageSelector, message) 
     return false;
 };
 
-//Returns true is we are not in a CMS editor
-function isNotInCMS() {
-    //We apply the CSS rules
-    let siteCompatibility = Utils.GetScriptAttributeData('data-site-compatibility') ? Utils.GetScriptAttributeData('data-site-compatibility') : 'none';
-    //console.log('isNotInCMS SiteFellowsUI', !Utils.IsInCMSEditor(siteCompatibility));
-    return !Utils.IsInCMSEditor(siteCompatibility);
-};
-
 //Cycle function - can be run every time we need to update what it's on the page
 function updateUI() {
 
 
-    if (isNotInCMS()) {
+    if (Utils.IsNotInCMS()) {
 
         //Remove all modals
         let allModals = document.querySelectorAll('.sf-generated-modal');
@@ -157,9 +149,9 @@ function bindClickToSiteRedirect(selector, redirectKey, callbackFunction) {
 
 //Bind all elements events
 function bindUIEvents() {
-    //console.log('bindUIEvents - isNotInCMS',isNotInCMS() );
+    //console.log('bindUIEvents - Utils.IsNotInCMS',Utils.IsNotInCMS() );
     //If we are in a CMS ditor we exit
-    if (isNotInCMS()) {
+    if (Utils.IsNotInCMS()) {
 
         //Login + Register Buttons for redirect
         bindClickToSiteRedirect('[href="#sf-login"]', 'login');
@@ -208,6 +200,7 @@ function checkIfConfigLoadedAndHTMLIsLoaded() {
         }
     }
 };
+
 //--------------
 //SiteFellows UI
 const SiteFellowsUI = {

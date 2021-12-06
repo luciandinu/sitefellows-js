@@ -18,14 +18,6 @@ async function fetchDocumentFromURL(type, url) {
     }
 };
 
-//Create a script tag in the head of the page
-function createScriptTag(url, callback) {
-    var scriptTag = document.createElement('script');
-    scriptTag.setAttribute('src', url);
-    if (callback) scriptTag.onload = callback;
-    document.head.appendChild(scriptTag);
-};
-
 //Insert the default CSS for the forms
 function insertDefaultCSS(callback) {
     var cssTag = document.createElement('style');
@@ -272,17 +264,10 @@ function applyCSSRules() {
     cssTag.setAttribute('id', 'sf-css');
 
 
-    cssTag.innerHTML = isNotInCMS() ? css : '';
+    cssTag.innerHTML = Utils.IsNotInCMS() ? css : '';
     document.head.appendChild(cssTag);
 };
 
-//Returns true is we are not in a CMS editor
-function isNotInCMS() {
-    //We apply the CSS rules
-    var siteCompatibility = Utils.GetScriptAttributeData('data-site-compatibility') ? Utils.GetScriptAttributeData('data-site-compatibility') : 'none';
-    //console.log('isNotInCMS SiteFellows', !Utils.IsInCMSEditor(siteCompatibility));
-    return !Utils.IsInCMSEditor(siteCompatibility);
-};
 
 //-----------
 //SiteFellows
