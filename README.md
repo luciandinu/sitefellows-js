@@ -1,6 +1,6 @@
 # SiteFellowsJS
  
-SiteFellowsJS is a simple JavaScript library that allows you to easily add membership functionality on a website similar to Memberstack.
+[WIP] SiteFellowsJS is a simple JavaScript library that allows you to easily add membership functionality on a website similar to Memberstack.
 
 Alpha Stage
 -----------
