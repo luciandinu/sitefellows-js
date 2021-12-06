@@ -229,10 +229,14 @@ function applyCSSRules() {
             authenticated: false,
             selectors: [
                 '[href$="#sf-login"]',
-                '.sf-login-form',
                 '[href$="#sf-login-modal"]',
+                '.sf-login-button',
+                '.sf-login-modal-button',
+                '.sf-login-form',
                 '[href$="#sf-register"]',
+                '[href$="#sf-register-modal"]',
                 '.sf-register-form',
+                '.sf-register-button',
                 '.sf-public-content-only'
             ]
         },
@@ -240,6 +244,7 @@ function applyCSSRules() {
             authenticated: true,
             selectors: [
                 '[href$="#sf-logout"]',
+                '.sf-logout-button',
                 '.sf-authenticated-content-only'
             ]
         }
