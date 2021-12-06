@@ -6,24 +6,6 @@ import Utils from "./utils";
 import SiteFellowsUI from "./sfui";
 import LocalStore from './localstore';
 
-
-//Returns the value of an attribure on the head sript tage
-function getScriptAttributeData(key) {
-    var docH = document.head;
-    var hMLKeyData;
-
-    var sElements = docH.querySelectorAll('script');
-
-    sElements.forEach(function (sElement) {
-        var mlKey = sElement.getAttribute(key);
-        if (mlKey) {
-            hMLKeyData = mlKey;
-            return;
-        }
-    });
-    return hMLKeyData;
-};
-
 //Fetch a JSON from URL
 //type can be: json or text
 async function fetchDocumentFromURL(type, url) {
@@ -65,12 +47,11 @@ async function initializeConfig() {
     if (localSiteConfig && timestampDifference < 600000) {
         //_SITEFELLOWS_CONFIG = JSON.parse(localSiteConfig);
     } else {
-        var serverSiteConfigData = getScriptAttributeData('data-site-config');
+        var serverSiteConfigData = Utils.GetScriptAttributeData('data-site-config');
         var serverSiteConfig = await fetchDocumentFromURL('json', serverSiteConfigData);
         LocalStore.ConfigData = serverSiteConfig;
         LocalStore.ConfigDataTimestamp = new Date(Date.now());
     }
-
 
 };
 
@@ -289,9 +270,18 @@ function applyCSSRules() {
 
     var cssTag = Utils.DoesHTMLElementExists('#sf-css') ? document.head.querySelector('#sf-css') : document.createElement('style');
     cssTag.setAttribute('id', 'sf-css');
-    cssTag.innerHTML = css;
-    //if (callback) cssTag.onload = callback;
+
+
+    cssTag.innerHTML = isNotInCMS() ? css : '';
     document.head.appendChild(cssTag);
+};
+
+//Returns true is we are not in a CMS editor
+function isNotInCMS() {
+    //We apply the CSS rules
+    var siteCompatibility = Utils.GetScriptAttributeData('data-site-compatibility') ? Utils.GetScriptAttributeData('data-site-compatibility') : 'none';
+    //console.log('isNotInCMS SiteFellows', !Utils.IsInCMSEditor(siteCompatibility));
+    return !Utils.IsInCMSEditor(siteCompatibility);
 };
 
 //-----------
@@ -303,29 +293,23 @@ const SiteFellows = {
         insertDefaultCSS();
         applyCSSRules();
 
+        //Initialize config
         await initializeConfig();
 
-        //Dispatch the Config Loaded Event
-        const configLoadedEvent = new Event('sitefellow/config-loaded');
+        //Dispatch Config Loaded Event
+        var configLoadedEvent = new Event('sitefellow/config-loaded');
         document.dispatchEvent(configLoadedEvent);
 
         //Initialize Firebase Auth
         initializeFirebase();
 
+        //We reaply the CSS rules on document load
+        // document.addEventListener("DOMContentLoaded", function () {
+        //     applyCSSRules();
+        // });
 
-        //document.addEventListener('sitefellow/config-loaded', function () {
-
-        //If we are in a CMS ditor we exit
-        if (!Utils.IsInCMSEditor(LocalStore.ConfigData.SITE.options.cmsCompatibility)) {
-
-            //Apply URL rules
-            applyURLRules();
-        };
-
-
-        //});
-
-
+        //Apply UR rules
+        applyURLRules();
 
     },
     //Login User With Email

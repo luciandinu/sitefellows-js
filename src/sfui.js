@@ -6,6 +6,7 @@ function showFormErrorMessage(errorSelector, message) {
     errorSelector.innerText = message;
     errorSelector.classList.add('show');
 };
+
 function checkIfFormFieldIsEmpty(fieldSelector, errorMessageSelector, message) {
     if (fieldSelector.value.length == 0) {
         showFormErrorMessage(errorMessageSelector, message);
@@ -13,6 +14,7 @@ function checkIfFormFieldIsEmpty(fieldSelector, errorMessageSelector, message) {
     }
     return false;
 };
+
 function checkIfEmailFieldIsValid(fieldSelector, errorMessageSelector, message) {
     if (!Utils.IsEmailAddressValid(fieldSelector.value)) {
         showFormErrorMessage(errorMessageSelector, message);
@@ -20,11 +22,20 @@ function checkIfEmailFieldIsValid(fieldSelector, errorMessageSelector, message) 
     }
     return false;
 };
+
+//Returns true is we are not in a CMS editor
+function isNotInCMS() {
+    //We apply the CSS rules
+    let siteCompatibility = Utils.GetScriptAttributeData('data-site-compatibility') ? Utils.GetScriptAttributeData('data-site-compatibility') : 'none';
+    //console.log('isNotInCMS SiteFellowsUI', !Utils.IsInCMSEditor(siteCompatibility));
+    return !Utils.IsInCMSEditor(siteCompatibility);
+};
+
 //Cycle function - can be run every time we need to update what it's on the page
 function updateUI() {
 
-    //If we are in a CMS ditor we exit
-    if (!Utils.IsInCMSEditor(LocalStore.ConfigData.SITE.options.cmsCompatibility)) {
+
+    if (isNotInCMS()) {
 
         //Remove all modals
         let allModals = document.querySelectorAll('.sf-generated-modal');
@@ -35,6 +46,7 @@ function updateUI() {
     };
 
 };
+
 //Create a modal and return its selector
 function createModalAndReturnContentSelector(title = '', footer = '') {
     const modalID = `data-id="${Utils.UUID()}"`;
@@ -63,6 +75,8 @@ function createModalAndReturnContentSelector(title = '', footer = '') {
     //var modalBackground
     return `.sf-modal-container[${modalID}] .sf-content`;
 };
+
+//Render the login
 function renderLogin(container, redirectOnSuccessURL) {
     const formID = `data-id="${Utils.UUID()}"`;
     const formMarkup = `
@@ -126,6 +140,7 @@ function renderLogin(container, redirectOnSuccessURL) {
     }
 
 };
+
 //Bind the click event for login or register buttons
 function bindClickToSiteRedirect(selector, redirectKey, callbackFunction) {
     if (Utils.DoesHTMLElementExists(selector)) {
@@ -139,10 +154,12 @@ function bindClickToSiteRedirect(selector, redirectKey, callbackFunction) {
         })
     }
 };
+
 //Bind all elements events
 function bindUIEvents() {
+    //console.log('bindUIEvents - isNotInCMS',isNotInCMS() );
     //If we are in a CMS ditor we exit
-    if (!Utils.IsInCMSEditor(LocalStore.ConfigData.SITE.options.cmsCompatibility)) {
+    if (isNotInCMS()) {
 
         //Login + Register Buttons for redirect
         bindClickToSiteRedirect('[href="#sf-login"]', 'login');
@@ -164,6 +181,7 @@ function bindUIEvents() {
         }
     }
 };
+
 //Check if Config + HTML is loaded - if true it will raise an Event
 function checkIfConfigLoadedAndHTMLIsLoaded() {
     //Check if Config + HTML is loaded
@@ -172,7 +190,7 @@ function checkIfConfigLoadedAndHTMLIsLoaded() {
     document.addEventListener('sitefellow/config-loaded', function () {
         configLoaded = true;
         isConfigLoadedAndHTMLLoaded();
-        // console.log('UI sitefellow/config-loaded');
+        //console.log('UI sitefellow/config-loaded');
     });
 
     document.addEventListener('DOMContentLoaded', function (e) {
@@ -198,6 +216,7 @@ const SiteFellowsUI = {
         checkIfConfigLoadedAndHTMLIsLoaded();
         document.addEventListener('sitefellow/config-and-html-loaded', function () {
             //Bing UI events and update the page after the html content is loaded
+            //console.log("Event: sitefellow/config-and-html-loaded");
             bindUIEvents();
             updateUI();
         })
@@ -222,6 +241,6 @@ const SiteFellowsUI = {
     }
 };
 
-window['SiteFellowsUI']= SiteFellowsUI;
+window['SiteFellowsUI'] = SiteFellowsUI;
 
 export default window['SiteFellowsUI'];

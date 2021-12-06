@@ -26,12 +26,27 @@ const Utils = {
     B64Encode: function (string) {
         return btoa(unescape(encodeURIComponent(string)));
     },
-    
+
     //Decode a B64encoded string back into string
     B64Decode: function (string) {
         return decodeURIComponent(escape(atob(string)));
     },
+    //Returns the value of an attribure on the head sript tage
+    GetScriptAttributeData: function (key) {
+        var docH = document.head;
+        var hMLKeyData;
 
+        var sElements = docH.querySelectorAll('script');
+
+        sElements.forEach(function (sElement) {
+            var mlKey = sElement.getAttribute(key);
+            if (mlKey) {
+                hMLKeyData = mlKey;
+                return;
+            }
+        });
+        return hMLKeyData;
+    },
     //Returns true if an HTML element exists
     DoesHTMLElementExists: function (selector) {
         return document.querySelectorAll(selector).length ? true : false;
