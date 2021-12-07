@@ -141,13 +141,6 @@ function firebaseSignOut() {
     });
 };
 
-//Add the Default Role and returns the new array
-function addDefaultRoleToRolesArray(roles) {
-    var authUserRoles = roles ? roles : [];
-    if (authUserRoles.includes('none') === false) authUserRoles.push('none');
-    return authUserRoles;
-};
-
 //Check path if matches the rules
 function getRuleBasedOnURLPath() {
     //var rules = _SITEFELLOWS_CONFIG.rules;
@@ -183,44 +176,49 @@ function getRuleBasedOnURLPath() {
         });
         return {
             path: bestRule.path,
-            roles: addDefaultRoleToRolesArray(bestRule.roles)
+            roles: bestRule.roles ? bestRule.roles : []
         }
     }
     return;
 };
 
 function applyURLRules() {
-    let authUser = LocalStore.UserData; //should get an object
-    let authUserRoles = LocalStore.UserRolesData ? LocalStore.UserRolesData : []; //should get an array
-    let matchingRuleForURL = getRuleBasedOnURLPath();
+    let isUserAuthenticated = LocalStore.UserData ? true : false;
+    let userRoles = LocalStore.UserRolesData ? LocalStore.UserRolesData : [];
+    let pageRules = getRuleBasedOnURLPath();
+    let pageRoles = getRuleBasedOnURLPath() ? getRuleBasedOnURLPath().roles : [];
 
-    authUserRoles = addDefaultRoleToRolesArray(authUserRoles);
+    console.log("userRoles", userRoles);
+    console.log("pageRoles", pageRoles);
 
-    //Appying the rule (if any)
-    if (matchingRuleForURL) {
-        if (!authUser) {
+    if (pageRules) {
+        if (!isUserAuthenticated) {
             //User is not authenticated case
             let redirectURL = LocalStore.ConfigData.paths.login ? LocalStore.ConfigData.paths.login : '/';
             console.log("Redirect to login", redirectURL);
             Utils.RedirectToURL(redirectURL);
-        } else {
-            //User is authenticated case
-            if (authUserRoles) {
-                var foundRoles = authUserRoles.filter(function (authRole) {
-                    let foundRole;
-                    if (matchingRuleForURL.roles) {
-                        matchingRuleForURL.roles.forEach(function (mRole) {
-                            if (mRole == authRole) foundRole = authRole;
-                        })
-                    };
-                    return foundRole;
 
-                });
-                //User doesn't have the appriate role case
-                if (foundRoles.length < matchingRuleForURL.roles.length) {
-                    let redirectURL = LocalStore.ConfigData.paths.restricted ? LocalStore.ConfigData.paths.restricted : '/';
-                    console.log("Redirect to restricted", redirectURL);
-                    Utils.RedirectToURL(redirectURL);
+        } else {
+            //Appying the rule (if any)
+            if (pageRoles.length > 0) {
+                //User is authenticated case
+                if (userRoles) {
+                    // console.log('pageRoles', pageRoles);
+                    // console.log('userRoles', userRoles);
+                    if (pageRoles.length > 0) {
+                        var foundRoles = pageRoles.filter(function (aPageRole) {
+                            return userRoles.includes(aPageRole);
+                        });
+                    };
+
+                    console.log('applyURLRules - foundRoles', foundRoles);
+                    //User doesn't have the appriate role case
+                    //if (foundRoles.length < pageRoles.length) {
+                    if (foundRoles.length == 0) {
+                        let redirectURL = LocalStore.ConfigData.paths.restricted ? LocalStore.ConfigData.paths.restricted : '/';
+                        console.log("Redirect to restricted", redirectURL);
+                        Utils.RedirectToURL(redirectURL);
+                    }
                 }
             }
 
@@ -229,7 +227,38 @@ function applyURLRules() {
 
 };
 
+//It returns an array of CSS selectors
+function getCSSSelectorsBasedOnRules() {
+    let isUserAuthenticated = LocalStore.UserData ? true : false;
+    let userRoles = LocalStore.UserRolesData ? LocalStore.UserRolesData : [];
+    //let pageRoles = getRuleBasedOnURLPath() ? getRuleBasedOnURLPath().roles : [];
+    let allPagesRoles = LocalStore.ConfigData.roles ? LocalStore.ConfigData.roles : [];
+
+
+    if (isUserAuthenticated) {
+
+
+        console.log('userRoles', userRoles);
+        if (allPagesRoles.length > 0) {
+            var foundRoles = allPagesRoles.filter(function (aPageRole) {
+                return !userRoles.includes(aPageRole);
+            });
+        };
+        console.log('getCSSSelectorsBasedOnRules - foundRoles', foundRoles);
+        return foundRoles ? foundRoles : [];
+
+    }
+
+    console.log('allPagesRoles !!!!!!!!', allPagesRoles);
+    return allPagesRoles;
+
+};
+
 function applyCSSRules() {
+    let rolesCSS = getCSSSelectorsBasedOnRules().map(function (aRole) {
+        return '.sf-role-' + aRole;
+    });
+    //console.log('rolesCSS',rolesCSS);
     //What do we hide
     let defaultCSSSelectors = [
         {
@@ -244,7 +273,7 @@ function applyCSSRules() {
                 '[href$="#sf-register-modal"]',
                 '.sf-register-form',
                 '.sf-register-button',
-                '.sf-public-content-only'
+                '.sf-public-content'
             ]
         },
         {
@@ -252,7 +281,7 @@ function applyCSSRules() {
             selectors: [
                 '[href$="#sf-logout"]',
                 '.sf-logout-button',
-                '.sf-authenticated-content-only'
+                '.sf-authenticated-content'
             ]
         }
     ]
@@ -266,7 +295,7 @@ function applyCSSRules() {
     let allCSSSelectors = foundSelectors.flat().map(function (selector) { return selector.selectors });
 
     let css = `
-    ${allCSSSelectors.join(",")} {
+    ${[...allCSSSelectors, ...rolesCSS].join(",")} {
         display: none !important;
         visibility: hidden !important;
     }
