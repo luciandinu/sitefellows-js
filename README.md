@@ -19,11 +19,7 @@ Website head element:
 
 Optionally we can specify a CMS compatibility mode with the `data-site-compatibility` attribute (currently implemented only `sitejet`)
 ```
-<script>
-    const firebaseConfig = {
-        //Your Firebase configuration
-    };
-</script>
+...
 <script src="https://sf-js-lib.surge.sh/sitefellows.js" data-site-compatibility="sitejet" data-site-config="your-site-config.json"></script>
 ```
 
