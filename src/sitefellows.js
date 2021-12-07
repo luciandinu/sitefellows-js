@@ -50,8 +50,14 @@ async function initializeConfig() {
 //Initialize Firebase
 function initializeFirebase() {
 
-    //Initializa Firebase
-    initializeApp(LocalStore.ConfigData.FIREBASE);
+    //Initialize Firebase
+    if (firebaseConfig) {
+        //If we have the firebaseConfig object we are going to use it
+        initializeApp(firebaseConfig);
+    } else {
+        //Get the firebaseConfig from the config file
+        initializeApp(LocalStore.ConfigData.firebaseConfig);
+    }
 
     //Bind Firebase onAuthStateChangedEvent
     const auth = getAuth();
@@ -59,6 +65,7 @@ function initializeFirebase() {
         //Store User
         //var storage = window.localStorage;
         if (user) {
+            console.log(user);
             LocalStore.UserData = getUserDataFromFirebaseAuthUserObject(user);
             //storage.setItem('sitefellows-user', JSON.stringify());
         } else {
@@ -102,7 +109,7 @@ function firebaseSignInWithEmail(email, password, redirectOnSuccessURL) {
         .then(function (userCredential) {
             // Signed in
             var user = userCredential.user;
-            // console.log(user);
+            //console.log(user);
             //Store User
             var storage = window.localStorage;
             storage.setItem('sitefellows-user', JSON.stringify(getUserDataFromFirebaseAuthUserObject(user)));
@@ -143,8 +150,8 @@ function addDefaultRoleToRolesArray(roles) {
 
 //Check path if matches the rules
 function getRuleBasedOnURLPath() {
-    //var rules = _SITEFELLOWS_CONFIG.SITE.rules;
-    var rules = LocalStore.ConfigData.SITE.rules;
+    //var rules = _SITEFELLOWS_CONFIG.rules;
+    var rules = LocalStore.ConfigData.rules;
     // console.log('Rules:', rules);
 
     var searchResults = []; //this is where we store the results
@@ -193,7 +200,7 @@ function applyURLRules() {
     if (matchingRuleForURL) {
         if (!authUser) {
             //User is not authenticated case
-            let redirectURL = LocalStore.ConfigData.SITE.paths.login ? LocalStore.ConfigData.SITE.paths.login : '/';
+            let redirectURL = LocalStore.ConfigData.paths.login ? LocalStore.ConfigData.paths.login : '/';
             console.log("Redirect to login", redirectURL);
             Utils.RedirectToURL(redirectURL);
         } else {
@@ -211,7 +218,7 @@ function applyURLRules() {
                 });
                 //User doesn't have the appriate role case
                 if (foundRoles.length < matchingRuleForURL.roles.length) {
-                    let redirectURL = LocalStore.ConfigData.SITE.paths.restricted ? LocalStore.ConfigData.SITE.paths.restricted : '/';
+                    let redirectURL = LocalStore.ConfigData.paths.restricted ? LocalStore.ConfigData.paths.restricted : '/';
                     console.log("Redirect to restricted", redirectURL);
                     Utils.RedirectToURL(redirectURL);
                 }

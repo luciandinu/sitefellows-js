@@ -1,4 +1,5 @@
 import SFC from "./constants";
+import Utils from "./utils";
 var storage = window.localStorage;
 
 const LocalStore = {
@@ -23,8 +24,8 @@ const LocalStore = {
     set ConfigDataTimestamp(timestamp) {
         if (timestamp) {
             storage.setItem('sitefellows-config-timestamp', timestamp);
-        } else { 
-            storage.removeItem('sitefellows-config-timestamp') 
+        } else {
+            storage.removeItem('sitefellows-config-timestamp')
         };
 
     },
@@ -36,24 +37,37 @@ const LocalStore = {
     set UserData(user) {
         if (user) {
             storage.setItem('sitefellows-user', JSON.stringify(user));
-        } else { 
-            storage.removeItem('sitefellows-user') 
+        } else {
+            storage.removeItem('sitefellows-user')
         };
 
     },
     //User roles data
     get UserRolesData() {
         var localData = storage.getItem('sitefellows-user-roles');
-        return localData ? JSON.parse(localData) : null;
+        return localData ? JSON.parse(Utils.B64Decode(localData)) : null;
     },
     set UserRolesData(roles) {
         if (roles) {
-            storage.setItem('sitefellows-user-roles', JSON.stringify(roles));
-        } else { 
-            storage.removeItem('sitefellows-user-roles') 
+            storage.setItem('sitefellows-user-roles', Utils.B64Encode(JSON.stringify(roles)));
+        } else {
+            storage.removeItem('sitefellows-user-roles')
         };
 
-    }
+    },
+    //User roles data timestamp
+    get UserRolesDataTimestamp() {
+        var localData = storage.getItem('sitefellows-user-roles-timestamp');
+        return localData ? localData : null;
+    },
+    set UserRolesDataTimestamp(timestamp) {
+        if (timestamp) {
+            storage.setItem('sitefellows-user-roles-timestamp', timestamp);
+        } else {
+            storage.removeItem('sitefellows-user-roles-timestamp')
+        };
+
+    },
 }
 
 

@@ -140,7 +140,7 @@ function bindClickToSiteRedirect(selector, redirectKey, callbackFunction) {
         htmlElement.addEventListener('click', function (e) {
             let localConfig = LocalStore.ConfigData;
             if (callbackFunction) callbackFunction();
-            Utils.RedirectToURL(localConfig.SITE.paths[redirectKey] ? localConfig.SITE.paths[redirectKey] : '');
+            Utils.RedirectToURL(localConfig.paths[redirectKey] ? localConfig.paths[redirectKey] : '');
             e.preventDefault();
             e.stopPropagation();
         })
